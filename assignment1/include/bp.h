@@ -28,7 +28,7 @@ public:
 	unsigned getTag() const;
 	uint32_t getDest() const;
 	unsigned* getHistory();
-	
+	FsmState* getTable();
 };
 
 
@@ -40,12 +40,12 @@ private:
 	unsigned tag_size;
 	unsigned flush_num;
 	unsigned *global_history;
+	FsmState *global_fsm_table;
 	FsmState fsm_state;
 	bool is_global_history;
 	bool is_global_table;
 	ShareType share_type;
 	Branch *inputs;
-
 
 public:
 	BTB() = delete;

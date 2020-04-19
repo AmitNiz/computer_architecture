@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "bp_api.h"
+#include "../include/bp_api.h"
 
 int main(int argc, char **argv) {
 
