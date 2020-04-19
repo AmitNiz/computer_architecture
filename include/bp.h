@@ -27,7 +27,6 @@ private:
 	unsigned history_size;
 	unsigned fsm_table_size;
 	unsigned tag_size;
-	unsigned num_of_inputs;
 	unsigned flush_num;
 	FsmState fsm_state;
 	bool is_global_history;
