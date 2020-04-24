@@ -43,6 +43,7 @@ private:
 	unsigned fsm_table_size;
 	unsigned tag_size;
 	unsigned flush_num;
+	unsigned branch_num;
 	unsigned *global_history;
 	FsmState *global_fsm_table;
 	FsmState fsm_state;

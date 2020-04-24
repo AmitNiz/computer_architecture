@@ -84,10 +84,34 @@ void BTB::update(uint32_t pc, uint32_t target_pc,bool taken,uint32_t pred_dest){
 	unsigned *history = this->inputs[position].getHistory();
 	//Shift the history 1 bit to the left and add new bit to the lsb according to taken's state.
 	*history = ((*history << 1) & ((int)pow(2,history_size)-1)) | unsigned(taken);
+
+	// update flash num.
+	if((taken && pred_dest != target_pc) || (!taken && pred_dest != pc+4)){
+		this->flush_num++;
+	}
+	// update branch num.
+	this->branch_num++;
 }
 
+unsigned BTB::getNumOfFlushes() const{
+	return this->flush_num;
+}
 
+unsigned BTB::getSize() const{
+	if(!this->is_global_table  && !this->is_global_history)
+		return this->size * (this->tag_size + this->history_size + 2*(int)pow(2,this->history_size));
+	if(this->is_global_table  && !this->is_global_history)
+		return this->size * (this->tag_size + this->history_size) + 2*(int)pow(2,this->history_size);
+	if(!this->is_global_table  && this->is_global_history){
+		return this->size * (this->tag_size + 2*(int)pow(2,this->history_size)) + this->history_size;
+	}
 
+	return this->size * (this->tag_size) + this->history_size + 2*(int)pow(2,this->history_size);
+}
+
+unsigned BTB::getNumOfBranches() const{
+	return this->branch_num;
+}
 
 BTB::~BTB(){
 	if(global_history) delete global_history;
