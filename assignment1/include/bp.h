@@ -10,6 +10,7 @@ enum ShareType{
 
 
 class Branch{
+	bool is_initialized;
 	bool is_global_table;
 	bool is_global_history;
 	unsigned tag;
@@ -17,9 +18,12 @@ class Branch{
 	unsigned *history;
 	FsmState *table;
 public:
-	Branch() =default;
+	Branch();
 	Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history = nullptr,
-														FsmState *table = nullptr);
+						FsmState *table = nullptr,unsigned tag,unsigned dest);
+	
+	bool is_initialized() const;
+	Branch &operator=(const Branch& copy);
 	~Branch();	
 	//setters
 	void setTag(const unsigned tag);
@@ -46,6 +50,7 @@ private:
 	bool is_global_table;
 	ShareType share_type;
 	Branch *inputs;
+	unsigned get_table_position(ShareType share_type,unsigned position);
 
 public:
 	BTB() = delete;
