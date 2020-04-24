@@ -24,7 +24,7 @@ BTB::BTB(unsigned size,unsigned history_size,unsigned tag_size,FsmState fsm_stat
 bool BTB::predict(uint32_t pc,uint32_t *dest){
     int position = get_btb_position(pc, this->size);
     unsigned tag = get_btb_tag(pc,this->size, this->tag_size);
-    if(this->inputs[position].getTag() == tag) {
+    if(this->inputs[position].getTag() == tag && this->inputs[position].isInitialized() ) {
 		// Get history with xor of the pc (the position of the FSM in the FSM table).
 		unsigned table_pos = get_table_position(pc,position);
 		// Get the current state of the FSM.
@@ -49,12 +49,14 @@ bool BTB::predict(uint32_t pc,uint32_t *dest){
 void BTB::update(uint32_t pc, uint32_t target_pc,bool taken,uint32_t pred_dest){
 	unsigned position = get_btb_position(pc, this->size);
 	unsigned tag = get_btb_tag(pc,this->size,this->tag_size);
-	unsigned table_pos = get_table_position(pc,position);
 	//Check if the branch exists, if not create one.
 	if(!this->inputs[position].isInitialized() || this->inputs[position].getTag() != tag){
 		this->inputs[position] = Branch(this->fsm_state,this->fsm_table_size,this->global_history,this->global_fsm_table,tag,target_pc);	
-	}	
+	}
 	//Update Fsm
+    unsigned tag_test = this->inputs[position].getTag();
+    unsigned history_test = *(this->inputs[position].getHistory());
+    unsigned table_pos = get_table_position(pc,position);
 	FsmState current_state = this->inputs[position].getTable()[table_pos];
 	switch(current_state){
 		case WT:
@@ -130,22 +132,23 @@ bool Branch::isInitialized() const{
 
 
 
-Branch::Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,FsmState *table,unsigned tag, uint32_t dest):tag(tag),dest(dest),is_initialized(true){
-		if(history){
-			is_global_history = true;
-			this->history = history;
-		}else{
-			is_global_history = false;
-			this->history = new unsigned();
-		}
+Branch::Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,FsmState *table,unsigned tag, uint32_t dest):
+    tag(tag),dest(dest),is_initialized(true), init_state(fms_init), fsm_table_size(fsm_table_size){
+    if(history){
+        is_global_history = true;
+        this->history = history;
+    }else{
+        is_global_history = false;
+        this->history = new unsigned(0);
+    }
 
-		if(table){
-			is_global_table = true;
-			this->table = table;
-		}else{
-			is_global_table = false;
-			this->table = new FsmState[fsm_table_size]{fms_init};
-		}
+    if(table){
+        is_global_table = true;
+        this->table = table;
+    }else{
+        is_global_table = false;
+        this->table = new FsmState[fsm_table_size]{fms_init};
+    }
 }
 
 Branch::~Branch(){
@@ -158,10 +161,18 @@ Branch& Branch::operator=(const Branch& copy){
 	this->is_global_history = copy.is_global_history;
 	this->tag = copy.tag;
 	this->dest = copy.dest;
-	if(!is_global_history) delete this->history;
-	this->history = copy.history;
-	if(!is_global_table) delete[] this->table;
-	this->table = copy.table;
+	if(!is_global_history){
+        delete this->history;
+        this->history = new unsigned(0);
+	}else{
+        this->history = copy.history;
+	}
+	if(!is_global_table){
+        delete[] this->table;
+        this->table = new FsmState[copy.fsm_table_size]{copy.init_state};
+	}else{
+        this->table = copy.table;
+	}
 	return *this;
 }
 

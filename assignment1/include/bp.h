@@ -10,6 +10,8 @@ enum ShareType{
 
 
 class Branch{
+	FsmState init_state;
+	unsigned fsm_table_size;
 	bool is_initialized;
 	bool is_global_table;
 	bool is_global_history;
