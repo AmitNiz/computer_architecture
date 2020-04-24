@@ -10,7 +10,7 @@
 #include "../include/bp_api.h"
 
 int main(int argc, char **argv) {
-    char* args[2] = {"main","../input_examples/test1.in"};
+    char* args[2] = {"main","../input_examples/test37.in"};
 	freopen ("myfile.txt","w",stdout);
 	/*
     if (argc < 2) {

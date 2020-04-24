@@ -15,8 +15,8 @@ int get_btb_position(uint32_t pc ,unsigned size);
 // -----------------------------------BTB------------------------------------------
 BTB::BTB(unsigned size,unsigned history_size,unsigned tag_size,FsmState fsm_state,
 	bool is_global_history, bool is_global_table,ShareType share_type):
-		size(size),history_size(history_size),tag_size(tag_size),fsm_state(fsm_state),		  is_global_history(is_global_history),is_global_table(is_global_table),
-		share_type(share_type),inputs(new Branch[size]),fsm_table_size(pow(2,history_size)),flush_num(0),branch_num(0){
+		size(size),history_size(history_size),fsm_table_size((unsigned)pow(2,history_size)),tag_size(tag_size),flush_num(0),branch_num(0),fsm_state(fsm_state),is_global_history(is_global_history),is_global_table(is_global_table),
+		share_type(share_type),inputs(new Branch[size]){
 
 	this->global_history = (is_global_history) ? (new unsigned(0)) : (nullptr);
 	this->global_fsm_table = (is_global_table) ? (new FsmState[fsm_table_size]) : (nullptr);
@@ -146,7 +146,7 @@ bool Branch::isInitialized() const{
 
 
 Branch::Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,FsmState *table,unsigned tag, uint32_t dest):
-    tag(tag),dest(dest),is_initialized(true), init_state(fms_init), fsm_table_size(fsm_table_size){
+        init_state(fms_init), fsm_table_size(fsm_table_size),is_initialized(true),tag(tag),dest(dest){
     if(history){
         is_global_history = true;
         this->history = history;
@@ -228,13 +228,14 @@ FsmState* Branch::getTable(){
 
 unsigned BTB::get_table_position(uint32_t pc,unsigned position){
 	unsigned table_pos;
+	int test = *(this->inputs[position].getHistory());
 	switch (this->share_type) {
 		case NO_SHARE: {
 			table_pos = *(this->inputs[position].getHistory());
 			break;
 		}
 		case MID_SHARE: {
-			table_pos = *(this->inputs[position].getHistory()) ^ ((pc >> 15) & ((int) pow(2, history_size) - 1));
+			table_pos = *(this->inputs[position].getHistory()) ^ ((pc >> 16) & ((int) pow(2, history_size) - 1));
 			break;
 		}
 		case LSB_SHARE: {
