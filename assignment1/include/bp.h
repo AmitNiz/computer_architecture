@@ -19,10 +19,10 @@ class Branch{
 	FsmState *table;
 public:
 	Branch();
-	Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history = nullptr,
-						FsmState *table = nullptr,unsigned tag,unsigned dest);
+	Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,
+						FsmState *table,unsigned tag,unsigned dest);
 	
-	bool is_initialized() const;
+	bool isInitialized() const;
 	Branch &operator=(const Branch& copy);
 	~Branch();	
 	//setters
@@ -50,7 +50,7 @@ private:
 	bool is_global_table;
 	ShareType share_type;
 	Branch *inputs;
-	unsigned get_table_position(ShareType share_type,unsigned position);
+	unsigned get_table_position(uint32_t pc,unsigned position);
 
 public:
 	BTB() = delete;

@@ -26,7 +26,7 @@ bool BTB::predict(uint32_t pc,uint32_t *dest){
     unsigned tag = get_btb_tag(pc,this->size, this->tag_size);
     if(this->inputs[position].getTag() == tag) {
 		// Get history with xor of the pc (the position of the FSM in the FSM table).
-		unsigned table_pos = get_table_position(this->share_type,position);
+		unsigned table_pos = get_table_position(pc,position);
 		// Get the current state of the FSM.
 		FsmState state = this->inputs[position].getTable()[table_pos];
 		switch (state) {
@@ -49,43 +49,41 @@ bool BTB::predict(uint32_t pc,uint32_t *dest){
 void BTB::update(uint32_t pc, uint32_t target_pc,bool taken,uint32_t pred_dest){
 	unsigned position = get_btb_position(pc, this->size);
 	unsigned tag = get_btb_tag(pc,this->size,this->tag_size);
-	unsigned table_pos = get_table_position(this->share_type,position);
+	unsigned table_pos = get_table_position(pc,position);
 	//Check if the branch exists, if not create one.
-	if(!this->inputs[position].is_initialized() || this->inputs[position].getTag != tag){
+	if(!this->inputs[position].isInitialized() || this->inputs[position].getTag() != tag){
 		this->inputs[position] = Branch(this->fsm_state,this->fsm_table_size,this->global_history,this->global_fsm_table,tag,target_pc);	
 	}	
 	//Update Fsm
 	FsmState current_state = this->inputs[position].getTable()[table_pos];
 	switch(current_state){
-		WT:
+		case WT:
 		{
 			this->inputs[position].getTable()[table_pos] = (taken) ? (ST) : (WNT);
 			break;
 		}
-		WNT:
+		case WNT:
 		{
 			this->inputs[position].getTable()[table_pos] = (taken) ? (WT) : (SNT);
 			break;
 		}
 
-		ST:
+		case ST:
 		{
 			this->inputs[position].getTable()[table_pos] = (taken) ? (ST) : (WT);
 			break;
 		}
 		
-		SNT:
+		case SNT:
 		{
 			this->inputs[position].getTable()[table_pos] = (taken) ? (WNT) : (SNT);
 			break;
 		}
-
 	}
 	//Update history
 	unsigned *history = this->inputs[position].getHistory();
 	//Shift the history 1 bit to the left and add new bit to the lsb according to taken's state.
-	history = (history << 1) & (pow(2,history_size)-1) | unsigned(taken);
-	
+	*history = ((*history << 1) & ((int)pow(2,history_size)-1)) | unsigned(taken);
 }
 
 
@@ -102,7 +100,7 @@ BTB::~BTB(){
 Branch::Branch():is_global_table(false),is_global_history(false),
 	tag(0),dest(0),history(nullptr),table(nullptr),is_initialized(false){}
 
-bool Branch::is_initialized() const{
+bool Branch::isInitialized() const{
 	return is_initialized;
 }
 
@@ -142,8 +140,7 @@ Branch& Branch::operator=(const Branch& copy){
 	this->table = copy.table;
 	return *this;
 }
-	
-}
+
 
 void Branch::setTag(const unsigned tag){
 	this->tag =tag;
@@ -172,7 +169,8 @@ FsmState* Branch::getTable(){
 
 // ----------------------------Local Functions-------------------------------------
 
-unsigned BTB::get_table_position(ShareType share_type,unsigned position){
+unsigned BTB::get_table_position(uint32_t pc,unsigned position){
+	unsigned table_pos;
 	switch (this->share_type) {
 		case NO_SHARE: {
 			table_pos = *(this->inputs[position].getHistory());
@@ -184,6 +182,7 @@ unsigned BTB::get_table_position(ShareType share_type,unsigned position){
 		}
 		case LSB_SHARE: {
 			table_pos = *(this->inputs[position].getHistory()) ^ ((pc >> 2) & ((int) pow(2, history_size) - 1));
+			break;
 		}
 	}
 	return table_pos;
