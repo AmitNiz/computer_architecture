@@ -1,5 +1,6 @@
 #include "../include/bp.h"
 #include <cmath>
+#include <iostream>
 
 using namespace std;
 
@@ -14,11 +15,10 @@ int get_btb_position(uint32_t pc ,unsigned size);
 BTB::BTB(unsigned size,unsigned history_size,unsigned tag_size,FsmState fsm_state,
 	bool is_global_history, bool is_global_table,ShareType share_type):
 		size(size),history_size(history_size),tag_size(tag_size),fsm_state(fsm_state),		  is_global_history(is_global_history),is_global_table(is_global_table),
-		share_type(share_type),inputs(new Branch[size]),fsm_table_size(pow(2,history_size)){
+		share_type(share_type),inputs(new Branch[size]),fsm_table_size(pow(2,history_size)),flush_num(0),branch_num(0){
 
 	this->global_history = (is_global_history) ? (new unsigned(0)) : (nullptr);
-	this->global_fsm_table = (is_global_table) ? (new FsmState[fsm_table_size]{fsm_state}) : (nullptr);
-
+	this->global_fsm_table = (is_global_table) ? (new FsmState[fsm_table_size]{this->fsm_state}) : (nullptr);
 }
 
 bool BTB::predict(uint32_t pc,uint32_t *dest){
@@ -54,8 +54,7 @@ void BTB::update(uint32_t pc, uint32_t target_pc,bool taken,uint32_t pred_dest){
 		this->inputs[position] = Branch(this->fsm_state,this->fsm_table_size,this->global_history,this->global_fsm_table,tag,target_pc);	
 	}
 	//Update Fsm
-    unsigned tag_test = this->inputs[position].getTag();
-    unsigned history_test = *(this->inputs[position].getHistory());
+
     unsigned table_pos = get_table_position(pc,position);
 	FsmState current_state = this->inputs[position].getTable()[table_pos];
 	switch(current_state){
@@ -101,14 +100,14 @@ unsigned BTB::getNumOfFlushes() const{
 
 unsigned BTB::getSize() const{
 	if(!this->is_global_table  && !this->is_global_history)
-		return this->size * (this->tag_size + this->history_size + 2*(int)pow(2,this->history_size));
+		return this->size * (this->tag_size + 30 + this->history_size + 2*(int)pow(2,this->history_size));
 	if(this->is_global_table  && !this->is_global_history)
-		return this->size * (this->tag_size + this->history_size) + 2*(int)pow(2,this->history_size);
+		return this->size * (this->tag_size + 30 + this->history_size) + 2*(int)pow(2,this->history_size);
 	if(!this->is_global_table  && this->is_global_history){
-		return this->size * (this->tag_size + 2*(int)pow(2,this->history_size)) + this->history_size;
+		return this->size * (this->tag_size + 30 + 2*(int)pow(2,this->history_size)) + this->history_size;
 	}
 
-	return this->size * (this->tag_size) + this->history_size + 2*(int)pow(2,this->history_size);
+	return this->size * (this->tag_size + 30) + this->history_size + 2*(int)pow(2,this->history_size);
 }
 
 unsigned BTB::getNumOfBranches() const{
@@ -157,6 +156,7 @@ Branch::~Branch(){
 }
 
 Branch& Branch::operator=(const Branch& copy){
+	this->is_initialized = copy.is_initialized;
 	this->is_global_table = copy.is_global_table;
 	this->is_global_history = copy.is_global_history;
 	this->tag = copy.tag;

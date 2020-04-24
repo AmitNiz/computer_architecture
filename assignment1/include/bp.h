@@ -1,7 +1,7 @@
 #include <cstdint>
 
 enum FsmState{
-	ST,WT,WNT,SNT
+	SNT,WNT,WT,ST
 };
 
 enum ShareType{
