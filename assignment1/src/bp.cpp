@@ -260,7 +260,6 @@ int get_btb_position(uint32_t pc ,unsigned size){
 }
 
 unsigned get_btb_tag(uint32_t pc,unsigned size, unsigned tag_size){
-    // REMEMBER TO CHANGE BACK
     return (pc >> (2+(int)log2(size))) & ((int)pow(2,tag_size)-1);
     // return (pc >> 2) & ((int)pow(2,tag_size)-1);
 }
