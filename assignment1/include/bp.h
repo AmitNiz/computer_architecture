@@ -5,7 +5,7 @@ enum FsmState{
 };
 
 enum ShareType{
-	NO_SHARE,MID_SHARE,LSB_SHARE
+	NO_SHARE,LSB_SHARE,MID_SHARE
 };
 
 

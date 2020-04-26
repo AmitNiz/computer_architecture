@@ -1,7 +1,6 @@
 #include "../include/bp.h"
 #include <cmath>
 #include <iostream>
-#include <bitset> // *****************TEST************************************
 using namespace std;
 
 bool test = false;
@@ -57,15 +56,22 @@ void BTB::update(uint32_t pc, uint32_t target_pc,bool taken,uint32_t pred_dest){
 	unsigned tag = get_btb_tag(pc,this->size,this->tag_size);
 	//Check if the branch exists, if not create one.
 	if(!this->inputs[position].isInitialized() || this->inputs[position].getTag() != tag){
-		this->inputs[position] = Branch(this->fsm_state,this->fsm_table_size,this->global_history,this->global_fsm_table,tag,target_pc);	
+		this->inputs[position] = Branch(this->fsm_state,this->fsm_table_size,this->global_history,this->global_fsm_table,tag,target_pc);
 	}
 
+    this->inputs[position].setDest(target_pc);
 	//Update Fsm
     unsigned table_pos = get_table_position(pc,position);
 	FsmState current_state = this->inputs[position].getTable()[table_pos];
-	if(test)
-		std::cout<<"TEST: [" << table_pos << "]= "  << current_state <<endl;
-
+	if(test){
+        std::cout << "position - " << position <<" tag - "<< tag<<" ";
+        std::cout << "dest - " <<"0x"<< std::hex << this->inputs[position].getDest() << endl;
+        std::cout << "history - "<< *(this->inputs[position].getHistory()) << "  ";
+        std::cout << "fsm - ";
+        for(unsigned i = 0 ; i < this->fsm_table_size ; i++)
+            std::cout << this->inputs[position].getTable()[i] << ",";
+        std::cout << endl;
+	}
 	switch(current_state){
 		case WT:
 		{
@@ -102,10 +108,14 @@ void BTB::update(uint32_t pc, uint32_t target_pc,bool taken,uint32_t pred_dest){
 	}
 	// update branch num.
 	this->branch_num++;
-	if(test)
-		std::cout << "--update-- pc: " << std::hex << pc << ", tag: " << tag<< ", dest: "
-			  << this->inputs[position].getDest() << ", history: " <<std::bitset<4>(*(this->inputs[position].getHistory()))
-			  << ", state: " << this->inputs[position].getTable()[table_pos] <<", taken: "<<taken<< endl;
+	if(test){
+        std::cout << "history - "<< *(this->inputs[position].getHistory()) << "  ";
+        std::cout << "fsm - ";
+        for(unsigned i = 0 ; i < this->fsm_table_size ; i++)
+            std::cout << this->inputs[position].getTable()[i] << ",";
+        std::cout << endl;
+	}
+
 }
 
 unsigned BTB::getNumOfFlushes() const{
@@ -228,7 +238,6 @@ FsmState* Branch::getTable(){
 
 unsigned BTB::get_table_position(uint32_t pc,unsigned position){
 	unsigned table_pos;
-	int test = *(this->inputs[position].getHistory());
 	switch (this->share_type) {
 		case NO_SHARE: {
 			table_pos = *(this->inputs[position].getHistory());
@@ -251,6 +260,8 @@ int get_btb_position(uint32_t pc ,unsigned size){
 }
 
 unsigned get_btb_tag(uint32_t pc,unsigned size, unsigned tag_size){
-	return (pc >> (2+(int)log2(size))) & ((int)pow(2,tag_size)-1);
+    // REMEMBER TO CHANGE BACK
+    return (pc >> (2+(int)log2(size))) & ((int)pow(2,tag_size)-1);
+    // return (pc >> 2) & ((int)pow(2,tag_size)-1);
 }
 

@@ -11,7 +11,7 @@
 
 int main(int argc, char **argv) {
     char* args[2] = {"main","../input_examples/test37.in"};
-	freopen ("myfile.txt","w",stdout);
+	freopen ("myfile_our_diff.txt","w",stdout);
 	/*
     if (argc < 2) {
 		fprintf(stderr, "Usage: %s <trace filename>\n", args[0]);
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 	}
 	int l = 2;
 	while ((fgets(line, 256, trace) != NULL)) {
-		if(l==5){
+		if(l==3){
 			int p = 0;
 		}
 
