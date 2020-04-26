@@ -20,7 +20,7 @@ class Branch{
 	unsigned *history;
 	FsmState *table;
 public:
-	Branch();
+	Branch() = default;
 	Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,
 						FsmState *table,unsigned tag,unsigned dest);
 	

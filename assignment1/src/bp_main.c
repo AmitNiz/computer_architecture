@@ -10,15 +10,13 @@
 #include "../include/bp_api.h"
 
 int main(int argc, char **argv) {
-    char* args[2] = {"main","../input_examples/test37.in"};
-	freopen ("myfile_our_diff.txt","w",stdout);
-	/*
-    if (argc < 2) {
-		fprintf(stderr, "Usage: %s <trace filename>\n", args[0]);
+
+	if (argc < 2) {
+		fprintf(stderr, "Usage: %s <trace filename>\n", argv[0]);
 		exit(1);
 	}
-    */
-	FILE *trace = fopen(args[1], "r");
+
+	FILE *trace = fopen(argv[1], "r");
 	if (trace == 0) {
 		fprintf(stderr, "cannot open trace file\n");
 		exit(2);
@@ -79,12 +77,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Predictor init failed\n");
 		exit(8);
 	}
-	int l = 2;
-	while ((fgets(line, 256, trace) != NULL)) {
-		if(l==3){
-			int p = 0;
-		}
 
+	while ((fgets(line, 256, trace) != NULL)) {
 		if (line[0] == '\n') {
 			break;
 		}
@@ -112,7 +106,6 @@ int main(int argc, char **argv) {
 
 
 		BP_update(pc, targetPc, taken, dst);
-		l++;
 	}
 
 	SIM_stats stats;
