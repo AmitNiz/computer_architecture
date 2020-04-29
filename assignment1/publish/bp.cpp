@@ -29,7 +29,7 @@ class Branch{
 	unsigned *history;
 	FsmState *table;
 public:
-	Branch() = default;
+	Branch();
 	Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,
 						FsmState *table,unsigned tag,unsigned dest);
 	
@@ -205,7 +205,7 @@ unsigned BTB::getNumOfBranches() const{
 
 BTB::~BTB(){
 	if(global_history) delete global_history;
-	if(global_fsm_table) delete global_fsm_table;
+	if(global_fsm_table) delete[] global_fsm_table;
 	delete[] inputs;
 }
 
@@ -216,6 +216,8 @@ bool Branch::isInitialized() const{
 	return is_initialized;
 }
 
+Branch::Branch():is_global_table(false),is_global_history(false),
+	tag(0),dest(0),history(nullptr),table(nullptr),is_initialized(false){}
 
 Branch::Branch(FsmState fms_init,unsigned fsm_table_size,unsigned *history,FsmState *table,unsigned tag, uint32_t dest):
         init_state(fms_init), fsm_table_size(fsm_table_size),is_initialized(true),tag(tag),dest(dest){
