@@ -49,7 +49,7 @@ struct CacheManager{
 
 unsigned _extractSet(unsigned addr, unsigned size);
 unsigned _extractTag(unsigned addr, unsigned size);
-unsigned _reconstructAddr(unsigned tag, unsigned set);
+unsigned _reconstructAddr(unsigned tag, unsigned set,int size);
 void _updateQueue(vector<unsigned> &queue,unsigned tag,unsigned max_size);
 unsigned _popFrontQueue(vector<unsigned> &queue);
 // ------------------------- Implementations ---------------------------------
