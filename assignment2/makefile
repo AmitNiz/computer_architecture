@@ -1,19 +1,14 @@
+CC = g++
+OBJS = cacheSim.o
+EXEC = cacheSim
+COMP_FLAG = --std=c++11
 
+$(EXEC) : $(OBJS)
+	$(CC) $(OBJS) -o $@
 
-compiler := g++
-flags := -std=c++11 -Wall -g
-src_dir := src
-src_files := $(shell ls $(src_dir))
-obj_files := $(patsubst %.cpp,%.o, $(src_files))
-bin := chacheSim
+chaceSim.o:
+	$(CC) -c $(COMP_FLAG) $*.cpp
 
-$(bin): $(obj_files)
-	$(compiler) $(flags) $^ -o $@
-
-$(obj_files): %.o: $(src_dir)/%.cpp
-	$(compiler) $(flags) -c $^
-
-.PHONY: clean
 clean:
-	rm -f *.o
-	rm -f $(bin)
+	rm -f $(OBJS) $(EXEC)
+

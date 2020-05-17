@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "cacheManager.cpp"
 
 using std::FILE;
 using std::string;
@@ -14,12 +15,10 @@ using std::ifstream;
 using std::stringstream;
 
 int main(int argc, char **argv) {
-
 	if (argc < 19) {
 		cerr << "Not enough arguments" << endl;
 		return 0;
 	}
-
 	// Get input arguments
 
 	// File
@@ -61,7 +60,8 @@ int main(int argc, char **argv) {
 			return 0;
 		}
 	}
-
+    CacheManager cacheManager(MemCyc,WrAlloc,BSize,L1Size,L2Size,L1Assoc,L2Assoc,L1Cyc,L2Cyc);
+	//cout << cacheManager.cache_level[0]->num_of_sets <<"  " <<cacheManager.cache_level[1]->num_of_sets <<endl;
 	while (getline(file, line)) {
 
 		stringstream ss(line);
@@ -69,33 +69,38 @@ int main(int argc, char **argv) {
 		char operation = 0; // read (R) or write (W)
 		if (!(ss >> operation >> address)) {
 			// Operation appears in an Invalid format
-			cout << "Command Format error" << endl;
+			//cout << "Command Format error" << endl;
 			return 0;
 		}
 
 		// DEBUG - remove this line
-		cout << "operation: " << operation;
+		//cout << "operation: " << operation;
 
 		string cutAddress = address.substr(2); // Removing the "0x" part of the address
 
 		// DEBUG - remove this line
-		cout << ", address (hex)" << cutAddress;
+		//cout << ", address (hex)" << cutAddress;
 
 		unsigned long int num = 0;
 		num = strtoul(cutAddress.c_str(), NULL, 16);
 
 		// DEBUG - remove this line
-		cout << " (dec) " << num << endl;
-
+		//cout << " (dec) " << num << endl;
+        cacheManager.simulate(operation,num);
+        //cout << endl << endl;
 	}
 
-	double L1MissRate;
-	double L2MissRate;
-	double avgAccTime;
+	double L1MissRate = 1 - ( double(cacheManager.cache_level[0]->num_of_hit) / double(cacheManager.cache_level[0]->num_of_requests) );
+	double L2MissRate = 1 - ( double(cacheManager.cache_level[1]->num_of_hit) / double(cacheManager.cache_level[1]->num_of_requests) );;
+	double avgAccTime = double(cacheManager.num_of_cycles)/cacheManager.num_of_calls;
 
+    //cout << "L1: " <<cacheManager.cache_level[0]->num_of_hit;
+    //cout <<" " << cacheManager.cache_level[0]->num_of_requests << endl;
+    //cout << "L2: " <<cacheManager.cache_level[1]->num_of_hit;
+    //cout <<" " << cacheManager.cache_level[1]->num_of_requests << endl;
 	printf("L1miss=%.03f ", L1MissRate);
 	printf("L2miss=%.03f ", L2MissRate);
 	printf("AccTimeAvg=%.03f\n", avgAccTime);
-
+	//cout << "TEST" << endl;
 	return 0;
 }
