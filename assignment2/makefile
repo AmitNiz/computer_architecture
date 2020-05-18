@@ -1,14 +1,9 @@
-CC = g++
-OBJS = cacheSim.o
-EXEC = cacheSim
-COMP_FLAG = --std=c++11
+# 046267 Computer Architecture - Spring 2020 - HW #2
 
-$(EXEC) : $(OBJS)
-	$(CC) $(OBJS) -o $@
+cacheSim: cacheSim.cpp
+	g++ -std=c++11 -o cacheSim cacheSim.cpp
 
-chaceSim.o:
-	$(CC) -c $(COMP_FLAG) $*.cpp
-
+.PHONY: clean
 clean:
-	rm -f $(OBJS) $(EXEC)
-
+	rm -f *.o
+	rm -f cacheSim

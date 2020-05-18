@@ -1,14 +1,15 @@
 #include <vector>
-#include <cmath>
+#include <math.h>
 #include <iostream>
 #ifndef CACHE_MANAGER
 #define CACHE_MANAGER
-
+/*
 using std::vector;
 using std::pow;
 using std::log2;
-
-// -----------------------------------Structs---------------------------------
+*/
+using namespace std;
+    // -----------------------------------Structs---------------------------------
 struct Entry{
     unsigned addr;
 	unsigned tag;
