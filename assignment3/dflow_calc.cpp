@@ -40,7 +40,7 @@ ProgCtx analyzeProg(const unsigned int opsLatency[], const InstInfo progTrace[],
     for(unsigned i=0;i<numOfInsts; i++){
         myProgCtx->depth_array[i] = 0;
     }
-
+    // histogram of registers that holds the last instruction write to this register
     int last_instuction_write[NUM_OF_REGS];
 
     for(unsigned i=0; i<NUM_OF_REGS; i++){
@@ -48,11 +48,13 @@ ProgCtx analyzeProg(const unsigned int opsLatency[], const InstInfo progTrace[],
     }
 
     for(unsigned i=0;i < numOfInsts; i++){
+        // update the dependencies of each instruction by the last one to write to sr1 and sr2
         myProgCtx->dependencies_array[i].src1_incruction_num = last_instuction_write[progTrace[i].src1Idx];
         myProgCtx->dependencies_array[i].src1_opcode = progTrace[last_instuction_write[progTrace[i].src1Idx]].opcode;
         myProgCtx->dependencies_array[i].src2_incruction_num = last_instuction_write[progTrace[i].src2Idx];
         myProgCtx->dependencies_array[i].src2_opcode = progTrace[last_instuction_write[progTrace[i].src2Idx]].opcode;
 
+        // the depth is the max{depth(sr1 dependency),depth(sr2 dependency)}
         int depth_src1,latency_src1,depth_src2,latency_src2;
         if(myProgCtx->dependencies_array[i].src1_incruction_num != ENTRY){
             depth_src1 =  myProgCtx->depth_array[myProgCtx->dependencies_array[i].src1_incruction_num];
@@ -76,7 +78,7 @@ ProgCtx analyzeProg(const unsigned int opsLatency[], const InstInfo progTrace[],
 
         last_instuction_write[progTrace[i].dstIdx] = i;
     }
-
+    // get the max depth of an instruction
     for(unsigned i=0; i< myProgCtx->numOfInsts ; i++){
         if(myProgCtx->max_depth < myProgCtx->depth_array[i] + opsLatency[progTrace[i].opcode]){
             myProgCtx->max_depth = myProgCtx->depth_array[i] + opsLatency[progTrace[i].opcode];
