@@ -10,7 +10,7 @@ class MultiThread{
 public:
 	MultiThread() =delete;
 	MultiThread(bool is_blocked,int num_of_threads,int load_num_of_cycles,
-								int store_num_of_cycles,int current_cycle);
+								int store_num_of_cycles,int context_switch_num_of_cycles);
 	MultiThread(const MultiThread& copy) = delete;
 	MultiThread& operator=(const MultiThread& copy) = delete;
 	~MultiThread();
@@ -24,6 +24,7 @@ private:
 	int num_of_threads;
 	int load_num_of_cycles;
 	int store_num_of_cycles;
+	int context_switch_num_of_cycles;
 	int current_cycle;
 	int num_of_instructions;
 	struct Thread{
@@ -37,18 +38,33 @@ private:
 	void simulate_grained();
 };
 
-void CORE_BlockedMT() {
+MultiThread::MultiThread(bool is_blocked,int num_of_threads,int load_num_of_cycles,
+			int store_num_of_cycles,int context_switch_num_of_cycles):is_blocked(is_blocked),num_of_threads(num_of_threads),
+			load_num_of_cycles(load_num_of_cycles),store_num_of_cycles(store_num_of_cycles),
+			context_switch_num_of_cycles(context_switch_num_of_cycles),current_cycle(0),num_of_instructions(0)
+			{}
 
+
+
+MultiThread* multiThread;
+int exit_count = 0;
+
+void CORE_BlockedMT() {
+	multiThread = new MultiThread(true,SIM_GetThreadsNum(),SIM_GetLoadLat(),SIM_GetStoreLat(),SIM_GetSwitchCycles());
 }
 
 void CORE_FinegrainedMT() {
 }
 
 double CORE_BlockedMT_CPI(){
+    exit_count++;
+    if(exit_count > 1) delete multiThread;
 	return 0;
 }
 
 double CORE_FinegrainedMT_CPI(){
+    exit_count++;
+    if(exit_count > 1) delete multiThread;
 	return 0;
 }
 
