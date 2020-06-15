@@ -21,8 +21,6 @@ public:
 	~MultiThread();
 	
 	void simulate();
-	void loadContex(tcontext* context,int thread_id)const;
-	int getCPI()const;
     bool is_blocked;
     int num_of_threads;
     int load_num_of_cycles;
